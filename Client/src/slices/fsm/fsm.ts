@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {FSM} from "../../types";
+import {FSM, Transition} from "../../types";
 
 export interface fsmState {
     FSMs: any;

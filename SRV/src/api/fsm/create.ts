@@ -7,15 +7,19 @@ const createFSM = (deps: Dependencies) => async (req: Request, res: Response)=> 
     try {
         const {fsm} = deps;
         const { label } = req.body;
+        const isAlreadyNameExists = fsm.find(machine => machine.getFSMLabel() === label);
+        if(isAlreadyNameExists) {
+            return res.status(500).send({data: {message: 'This name is already taken'}})
+        }
         const newFsm = new FSM({label});
         if(newFsm) {
             fsm.push(newFsm);
-            return res.send({code: 200, data: {message: 'created fsm successfully', fsm: newFsm}});
+            return res.send({data: {message:'created fsm successfully', fsm: newFsm}});
         } else {
-            return res.send({code: 500, data: {message: 'Could not create a new FSM'}});
+            return res.status(400).send({data: {message: 'Could not create a new FSM'}})
         }
     } catch (e) {
-        return res.send(new Error(`Internal error`));
+        return res.status(500).send({data: {message: e.message}})
     }
 }
 

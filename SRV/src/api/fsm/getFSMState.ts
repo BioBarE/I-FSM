@@ -8,12 +8,12 @@ const getFSMState = (deps: Dependencies) => async (req: Request, res: Response, 
         const currFsm = fsm.find((machine)=> machine.getFSMId() === id);
 
         if(currFsm) {
-            return res.send({code: 200, data: {state: currFsm.getState()}})
+            return res.send({data: {state: currFsm.getState()}})
         } else {
-            return res.send(new Error(`Could not find machine with id ${id}`));
+            return res.status(404).send({data: {message:`Could not find machine with id ${id}`}});
         }
     } catch (e) {
-        return res.send(new Error(`Internal error`));
+        return res.status(500).send({data: {message: e.message}})
     }
 }
 

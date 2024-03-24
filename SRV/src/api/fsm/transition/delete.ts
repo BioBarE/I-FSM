@@ -4,20 +4,18 @@ const deleteTransition = (deps: Dependencies) => async (req: Request, res: Respo
     try {
         const { transitionId, fsmId } = req.params;
         if(!transitionId || !fsmId) {
-            return res.send({code: 404, data: {message:`missing: ${!transitionId ? 'transitionId': ''}${!fsmId ? ',fsmId': ''}`}});
+            return res.status(400).send({data: {message:`missing: ${!transitionId ? 'transitionId': ''}${!fsmId ? ',fsmId': ''}`}})
         }
         const fsm = deps.fsm.find(machine => machine.getFSMId() === fsmId);
 
         if(fsm) {
             fsm.deleteTransition(transitionId);
-            return res.send({code: 200, data: {message:`transition ${transitionId} deleted successfully`, fsm}});
+            return res.send({data: {message:`transition ${transitionId} deleted successfully`, fsm}});
         } else {
-            return res.send({code: 404, data: {message:`no fsm was found`}});
+            return res.status(404).send({data: {message:`no fsm was found`}})
         }
-
-
     } catch (e) {
-        return res.send(new Error('Internal Error'));
+        return res.status(500).send({data: {message: e.message}})
     }
 };
 

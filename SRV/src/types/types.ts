@@ -14,6 +14,7 @@ export type Transition = {
 export interface Fsm {
     getState: () => Transition;
     getFSMId: () => string;
+    getFSMLabel: () => string;
     triggerByEvent: (event: Event, context?: Context) => void;
     trigger: () => void;
     // setCurrentState: (state: State) => void;

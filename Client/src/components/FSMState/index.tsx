@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect} from 'react';
-import './Viewer.css';
 import useAppSelector from "../../hooks/useAppSelector";
 import {selectEdges, selectNodes} from "../../slices/fsm/fsm.selectors";
 import 'reactflow/dist/style.css';
@@ -19,7 +18,6 @@ const FSMState = () => {
 
     const [nodes, setNodes] = useNodesState(selectedNodes);
     const [edges, setEdges] = useEdgesState(selectedEdges);
-
 
     const onNodesChange = useCallback(
         (changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)),

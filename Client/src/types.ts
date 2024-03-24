@@ -13,7 +13,8 @@ export type Transition = {
 export type FSM = {
     id: string,
     label: string,
-    transitions: Transition[]
+    transitions: Transition[],
+    currentState?: Transition | null
 }
 export type Response = {
     fsm: FSM

@@ -50,7 +50,10 @@ export const rest = createApi({
             query: ({fsmId}: {fsmId: string}) => ({
                 url: `/transition/trigger/${fsmId}`,
                 method: 'POST'
-            })
+            }),
+            transformResponse: (response: {code: number, data: Response}) => {
+                return response.data.fsm;
+            }
         })
     })
 })

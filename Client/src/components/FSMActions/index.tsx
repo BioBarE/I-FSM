@@ -1,17 +1,17 @@
-import React, {ChangeEvent, FC, useState} from 'react';
+import React, {ChangeEvent, useState} from 'react';
 import {useAddNewTransitionMutation, useCreateNewFSMMutation, useTriggerTransitionMutation} from "../../slices/api/api";
-import './FSMActions.css';
 import Input from "../Input";
 import Button from "../Button";
-import {debounce} from "../../utils/debounce";
 import useAppSelector from "../../hooks/useAppSelector";
-import {selectCurrentFSMId, selectFSMs} from "../../slices/fsm/fsm.selectors";
+import {selectCurrentFSM, selectCurrentFSMId, selectFSMs} from "../../slices/fsm/fsm.selectors";
 import {useDispatch} from "../../store";
 import {updateCurrentFSM, updateCurrentFSMId} from "../../slices/fsm/fsm";
 import {FSM} from "../../types";
-import {Autocomplete, TextField} from "@mui/material";
+import {Box, Grid} from "@mui/material";
+import Dropdown from "../Dropdown";
+import Checkbox from "../Checkbox";
+import Label from "../Label";
 
-const DEBOUNCE_DELAY = 150;
 
 const FSMActions = () => {
     const dispatch = useDispatch();
@@ -23,59 +23,84 @@ const FSMActions = () => {
     const [transitionTarget, setTransitionTarget] = useState<string>('');
     const [fsmLabel, setFsmLabel] = useState<string | null>(null);
     const [isInitialState, setIsInitialState] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const FSMs = useAppSelector(selectFSMs)
     const selectedCurrentFSMId = useAppSelector(selectCurrentFSMId);
-
-    const debouncedSetTransitionSource = debounce((value: string) => {
-        setTransitionSource(value)
-    }, DEBOUNCE_DELAY);
-    const debouncedSetTransitionTarget = debounce((value: string) => {
-        setTransitionTarget(value)
-    }, DEBOUNCE_DELAY);
-    const createNewFSM = async () => {
-        const response = await createNewFsm({label: fsmLabel});
-        const newFSMId = response as { data?: string };
-
-        if(newFSMId.data) {
-            dispatch(updateCurrentFSMId(newFSMId.data));
-        }
-
+    const selectedCurrentFSM = useAppSelector(selectCurrentFSM);
+    const createNewFSM = async (fsmLabel: string) => {
+        createNewFsm({label: fsmLabel})
+            .unwrap()
+            .then((newFSMId:string) => {
+                if (newFSMId) {
+                    dispatch(updateCurrentFSMId(newFSMId));
+                }
+            }).catch((error) => {
+            setErrorMessage(error.data.data.message || 'Internal Error')
+        });
     }
 
     const onCreateNewTransitionClicked = async () => {
         if (selectedCurrentFSMId) {
-            const response = await addNewTransition({
+            addNewTransition({
                 fsmId: selectedCurrentFSMId,
                 transition: {source: transitionSource, target: transitionTarget},
                 isInitialState
-            });
-            const updatedFSM = response as { data: FSM};
-            if (updatedFSM.data) {
-                dispatch(updateCurrentFSM(updatedFSM.data))
-            }
+            })
+                .unwrap()
+                .then((updatedFSM: FSM) => {
+                    if (updatedFSM.id) {
+                        dispatch(updateCurrentFSM(updatedFSM))
+                    }
+                }).catch((error) => {
+                    setErrorMessage(error.data.data.message || 'Internal Error')
+                });
         }
         setIsInitialState(false);
     }
 
     const handleTransitionSourceChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
-        debouncedSetTransitionSource(value);
+        setTransitionSource(value);
     }
 
     const handleTransitionTargetChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
-        debouncedSetTransitionTarget(value);
+        setTransitionTarget(value)
     }
 
-    const handleFSMNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setFsmLabel(value);
+    const handleFSMNameChange = (_: any, newValue: FSM | string | null) => {
+        if (typeof newValue === 'object' && newValue) {
+            let newFSMLabel = newValue.label;
+            if (newValue?.label) {
+
+                if (newValue?.label?.startsWith("Add")) {
+                    newFSMLabel = newValue.label.substring(4).trim();
+                }
+
+                setFsmLabel(newValue.label);
+            }
+            // selected already created fsm
+            if (newValue?.id) {
+                dispatch(updateCurrentFSMId(newValue.id))
+            } else {
+                createNewFSM(newFSMLabel);
+            }
+        }
     }
 
     const onTriggerTransitionClicked = async () => {
         if (selectedCurrentFSMId) {
-            await triggerTransition({fsmId: selectedCurrentFSMId});
+            triggerTransition({fsmId: selectedCurrentFSMId})
+                .unwrap()
+                .then((updatedFSM) => {
+                    if (updatedFSM.id) {
+                        dispatch(updateCurrentFSM(updatedFSM));
+                    }
+                })
+                .catch((error) => {
+                    setErrorMessage(error.data.data.message || 'Internal Error')
+                });
         }
     }
 
@@ -84,31 +109,31 @@ const FSMActions = () => {
     }
 
     return (
-        <div className='fsm-actions-container'>
-            <div className='fsm-action-create-new-fsm'>
-                <Input placeholder='FSM Name' onChange={handleFSMNameChange}/>
-                <Button label='Create new FSM' onClick={createNewFSM} disabled={!fsmLabel}/>
-            </div>
-
-            <div className='fsm-action-create-new-transition-container'>
-                <div className={'fsm-action-create-new-transition'}>
-                    <Input placeholder='Source' onChange={handleTransitionSourceChange}/>
-                    <Input placeholder='Target' onChange={handleTransitionTargetChange}/>
-                    <Button disabled={!transitionSource || !transitionTarget} label='Create New Transition'
+        <Grid ml={2} container display={'flex'} flexDirection={'column'} alignItems={'flex-start'} gap={2}>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start'}}>
+                <Label text={'Name Your Machine'}/>
+                <Dropdown handleOnChange={handleFSMNameChange} options={FSMs} value={selectedCurrentFSM}/>
+            </Box>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start'}}>
+                <Label text={'Lets create a new transition to this machine'}/>
+                <Box sx={{display: 'flex', flexDirection: 'row', gap: '16px'}}>
+                    <Input label={'Source'} value={transitionSource} onChange={handleTransitionSourceChange}/>
+                    <Input label={'Target'} value={transitionTarget} onChange={handleTransitionTargetChange}/>
+                    <Checkbox label={'Initial State'} checked={isInitialState} onChange={handleIsInitialStateChange}/>
+                    <Button label={'Create A New Transition'} disabled={!transitionSource || !transitionTarget}
                             onClick={onCreateNewTransitionClicked}/>
-                </div>
-                <div className={'fsm-action-create-new-transition-init-state'}>
-                    <Input checked={isInitialState} onChange={handleIsInitialStateChange} type={'checkbox'}/>
-                    <label>Initial State</label>
-                </div>
-            </div>
-
-            <div className='fsm-action-trigger-next-step'>
-                <Button disabled={!selectedCurrentFSMId} label='Trigger a transition'
+                </Box>
+            </Box>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start'}}>
+                <Label text={'Lets try the machine'}/>
+                <Button label={'Trigger next step'} disabled={!selectedCurrentFSMId}
                         onClick={onTriggerTransitionClicked}/>
-            </div>
+            </Box>
 
-        </div>
+            <Box>
+                <Label isError={true} text={errorMessage}/>
+            </Box>
+        </Grid>
     );
 }
 

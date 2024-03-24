@@ -5,7 +5,7 @@ const getAllFSM = (deps: Dependencies) => async (req: Request, res: Response, ne
     try {
         return res.send(deps.fsm);
     } catch (e) {
-        return res.send(new Error(`Internal error`));
+        return res.status(500).send({data: {message: e.message}})
     }
 }
 

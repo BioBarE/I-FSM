@@ -6,20 +6,16 @@ export default class FSM implements Fsm {
     private currentState: Transition;
     private transitions: Transition[] = [];
     private readonly id: string;
-    label: string;
+    private readonly label: string;
 
     constructor({label}: {label: string}) {
         this.id = uuidv4();
         this.label = label;
     }
 
-    // public setCurrentState = (state: State) => {
-    //     if(state) {
-    //         this.currentState = state;
-    //     }
-    // }
-
     public addTransition = (transition: Transition, isInitialState: boolean) => {
+        const isExists = this.transitions.find( (trans: Transition) => transition.source === trans.source && transition.target === trans.target)
+        if(isExists) throw new Error('This transition is already exists')
         if(transition) {
             transition.id = uuidv4();
             this.transitions.push(transition);
@@ -76,6 +72,10 @@ export default class FSM implements Fsm {
         if(transition) {
             transition = updatedTransition;
         }
+    }
+
+    public getFSMLabel = () => {
+        return this.label;
     }
 
 }
