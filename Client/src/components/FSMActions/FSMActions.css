@@ -1,0 +1,32 @@
+.fsm-actions-container > div {
+    margin-bottom: 20px;
+}
+
+
+.fsm-action-create-new-fsm input,
+.fsm-action-create-new-fsm button,
+.fsm-action-create-new-transition input,
+.fsm-action-create-new-transition button,
+.fsm-action-trigger-next-step {
+    margin-left: 10px;
+}
+
+
+.fsm-action-create-new-transition-init-state {
+    margin-left: 10px;
+    margin-top: 5px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.fsm-action-create-new-transition-init-state label {
+    color: #bdbdbd;
+}
+
+
+.fsm-actions-container {
+    width: 70vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
