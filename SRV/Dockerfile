@@ -14,6 +14,6 @@ WORKDIR /app
 COPY --from=builder ./node_modules ./node_modules
 COPY . .
 
-EXPOSE 3000  # Replace with your app's port if it's different
+EXPOSE 3001
 
 CMD [ "npm", "start" ]
