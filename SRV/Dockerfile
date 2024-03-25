@@ -2,8 +2,8 @@ FROM node:alpine AS builder
 
 ARG PROJECT_NAME=srv
 
-COPY ./package.json /${PROJECT_NAME}/package.json
-COPY ./package-lock.json /${PROJECT_NAME}/package-lock.json
+COPY ./SRV/package.json /${PROJECT_NAME}/package.json
+COPY ./SRV/package-lock.json /${PROJECT_NAME}/package-lock.json
 
 WORKDIR /${PROJECT_NAME}
 
