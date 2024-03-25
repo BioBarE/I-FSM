@@ -1,11 +1,14 @@
 import React from 'react';
-import { fireEvent, waitFor, screen } from '@testing-library/react';
-
-import {render} from "../../../testUtils/customRenderUtils";
+import {fireEvent, waitFor, screen} from '@testing-library/react';
 import FSMActions from "../index";
+
+import {renderWithProviders} from "../../../testUtils/customRenderUtils";
+import {useCreateNewFSMMutation} from "../../../slices/api/api";
+
 describe('FSMActions Component', () => {
+
     test('renders without errors', () => {
-        render(
+        renderWithProviders(
             <FSMActions />
         );
         expect(screen.getByText('Name Your Machine')).toBeInTheDocument();
@@ -14,25 +17,23 @@ describe('FSMActions Component', () => {
     });
 
     test('creates a new FSM when name is selected', async () => {
-        const mockCreateNewFsm = jest.fn().mockResolvedValue('newFSMId');
-        jest.mock('../../../slices/api/api', () => ({
-            useCreateNewFSMMutation: () => [mockCreateNewFsm],
-            useAddNewTransitionMutation: () => [jest.fn()],
-            useTriggerTransitionMutation: () => [jest.fn()],
-        }));
+        const mockCreateNewFSMMutation = jest.fn();
+        (useCreateNewFSMMutation as jest.Mock).mockReturnValue([mockCreateNewFSMMutation]);
 
-        render(
+        renderWithProviders(
             <FSMActions />
         );
 
-        const input = screen.getByText('Name Your Machine');
-        fireEvent.change(input, { target: { value: 'Test FSM' } });
-        fireEvent.blur(input);
+        const input = screen.getByRole('combobox');
 
-        // Wait for the async function to complete
-        await waitFor(() => {
-            expect(mockCreateNewFsm).toHaveBeenCalled();
-        });
+        fireEvent.change(input, { target: { value: 'Test FSM' } });
+        fireEvent.keyDown(input, { key: 'arrowdown' });
+        fireEvent.keyDown(input, { key: 'Enter' });
+
+        // const newOption = screen.getByText('Add Test FSM');
+        // fireEvent.mouseDown(newOption);
+
+        expect(mockCreateNewFSMMutation).toHaveBeenCalled();
 
         expect(screen.getByText('Test FSM')).toBeInTheDocument();
     });
@@ -45,7 +46,7 @@ describe('FSMActions Component', () => {
             useTriggerTransitionMutation: () => [jest.fn()],
         }));
 
-        render(
+        renderWithProviders(
             <FSMActions />
         );
 
@@ -78,7 +79,7 @@ describe('FSMActions Component', () => {
             useTriggerTransitionMutation: () => [mockTriggerTransition],
         }));
 
-        render(
+        renderWithProviders(
             <FSMActions />
         );
 

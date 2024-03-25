@@ -6,16 +6,19 @@ const filter = createFilterOptions<{ id: string, label: string }>();
 export interface DropDownProps {
     handleOnChange: (event: any, value: any) => void;
     options: { id: string, label: string }[];
-    value: string | null
+    value: string | null;
+    label: string;
 }
 
 const Dropdown: FC<DropDownProps> = ({
                                          handleOnChange,
                                          options,
-                                         value
+                                         value,
+    label
                                      }) => {
     return (
         <Autocomplete
+            data-testid={'autocomplete'}
             value={value || ''}
             onChange={handleOnChange}
             disablePortal
@@ -43,13 +46,15 @@ const Dropdown: FC<DropDownProps> = ({
             renderInput={
                 (params) =>
                     <TextField
+                        aria-label={`text-field-${label}`}
                         variant="outlined"
                         color={'primary'}
                         {...params}
                         InputProps={{
                             ...params.InputProps,
                         }}
-                        label="FSM Name"/>}
+                        label={label}
+                        data-testid={`text-field-${label}`}/>}
             options={options}
             clearOnBlur
             filterOptions={(options, params) => {

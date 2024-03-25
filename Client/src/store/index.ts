@@ -1,4 +1,4 @@
-import  { configureStore } from '@reduxjs/toolkit';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {
     TypedUseSelectorHook,
     useDispatch as useReduxDispatch,
@@ -6,19 +6,25 @@ import {
 } from 'react-redux';
 import {rest} from "../slices/api/api";
 import {fsm} from "../slices/fsm/fsm";
-export const store = configureStore({
-    reducer: {
-        [rest.reducerPath]: rest.reducer,
-        [fsm.reducerPath]: fsm.reducer
-    },
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(rest.middleware),
+
+const rootReducer = combineReducers({
+    rest: rest.reducer,
+    fsm: fsm.reducer
 })
 
+export function setupStore(preloadedState?: Partial<RootState>) {
+    return configureStore({
+        reducer: rootReducer,
+        preloadedState,
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware().concat(rest.middleware),
+    })
+}
 
-export type RootState = ReturnType<typeof store.getState>;
 
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof rootReducer>
+export type AppStore = ReturnType<typeof setupStore>
+export type AppDispatch = AppStore['dispatch']
 
 export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector;
 export const useDispatch = () => useReduxDispatch<AppDispatch>();

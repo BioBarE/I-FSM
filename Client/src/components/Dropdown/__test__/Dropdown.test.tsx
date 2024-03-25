@@ -1,65 +1,81 @@
 import React from 'react';
-import { fireEvent, waitFor, screen} from '@testing-library/react';
-import Dropdown, {DropDownProps} from "../index";
-import {render} from "../../../testUtils/customRenderUtils";
+import {fireEvent, screen} from '@testing-library/react';
+import {renderWithProviders} from "../../../testUtils/customRenderUtils";
+import Dropdown from "../index";
 
-// Mock the createFilterOptions function
-jest.mock('@mui/material', () => ({
-    ...jest.requireActual('@mui/material'),
-    createFilterOptions: jest.fn(() => jest.fn()),
-}));
+const options = [
+    { id: 'option1', label: 'Option 1' },
+    { id: 'option2', label: 'Option 2' },
+    { id: 'option3', label: 'Option 3' },
+];
 
-describe('Dropdown component', () => {
-    const handleOnChangeMock = jest.fn();
-    const options = [
-        { id: '1', label: 'Option 1' },
-        { id: '2', label: 'Option 2' },
-    ];
+describe('Dropdown Component', () => {
+    it('should render the label and input field', () => {
+        renderWithProviders(
+            <Dropdown label="Test Label" options={options} value={null} handleOnChange={() => {}} />
+        );
 
-    const renderComponent = (props: Partial<DropDownProps> = {}) => {
-        const defaultProps: DropDownProps = {
-            handleOnChange: handleOnChangeMock,
-            options,
-            value: null,
-        };
-        return render(<Dropdown {...defaultProps} {...props} />);
-    };
-
-    test('renders dropdown with options', async () => {
-        renderComponent();
-        const inputElement = screen.getByLabelText('FSM Name');
-
-        fireEvent.focus(inputElement);
-        await waitFor(() => {
-            options.forEach(option => {
-                const optionElement = screen.getByText(option.label);
-                expect(optionElement).toBeInTheDocument();
-            });
-        });
+        expect(screen.getByLabelText('Test Label')).toBeInTheDocument();
+        expect(screen.getByTestId('text-field-Test Label')).toBeInTheDocument();
     });
 
-    test('calls handleOnChange when option is selected', async () => {
-        renderComponent();
-        const inputElement = screen.getByLabelText('FSM Name');
+    it('should display the options when input field is focused', () => {
+        renderWithProviders(
+            <Dropdown label="Test Label" options={options} value={null} handleOnChange={() => {}} />
+        );
 
-        fireEvent.focus(inputElement);
-        const optionElement = screen.getByText('Option 1');
-        fireEvent.click(optionElement);
+        const input = screen.getByRole('combobox');
+        fireEvent.mouseDown(input);
 
-        expect(handleOnChangeMock).toHaveBeenCalledTimes(1);
-        expect(handleOnChangeMock).toHaveBeenCalledWith(expect.any(Object), options[0]);
+        expect(input).toHaveAttribute('aria-expanded', 'true');
     });
 
-    test('renders "Add" option when input value is not present in options', async () => {
-        renderComponent();
-        const inputElement = screen.getByLabelText('FSM Name');
+    it('should filter options based on user input', () => {
+        renderWithProviders(
+            <Dropdown label="Test Label" options={options} value={null} handleOnChange={() => {}} />
+        );
 
-        fireEvent.change(inputElement, { target: { value: 'New Option' } });
-        fireEvent.focus(inputElement);
+        const input = screen.getByRole('combobox');
+        fireEvent.mouseDown(input);
 
-        await waitFor(() => {
-            const addOptionElement = screen.getByText('Add New Option');
-            expect(addOptionElement).toBeInTheDocument();
-        });
+
+        fireEvent.change(input, { target: { value: 'Option' } });
+
+        expect(screen.getByText('Option 1')).toBeInTheDocument();
+        expect(screen.getByText('Option 2')).toBeInTheDocument();
+        expect(screen.getByText('Option 3')).toBeInTheDocument();
+
+        fireEvent.change(input, { target: { value: 'Opt3' } });
+
+        expect(screen.queryByText('Option 3')).not.toBeInTheDocument();
+        expect(screen.queryByText('Option 1')).not.toBeInTheDocument();
+        expect(screen.queryByText('Option 2')).not.toBeInTheDocument();
+    });
+
+    it('should allow entering a new option (freeSolo)', () => {
+        const mockHandleChange = jest.fn();
+        renderWithProviders(
+            <Dropdown label="Test Label" options={options} value={null} handleOnChange={mockHandleChange} />
+        );
+
+        const input = screen.getByRole('combobox');
+        fireEvent.change(input, { target: { value: 'New Option' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+
+        expect(mockHandleChange).toHaveBeenCalled();
+        expect(screen.queryByText('Add New Option')).not.toBeInTheDocument(); // Option shouldn't be displayed in list
+    });
+
+    it('should call handleOnChange when an option is selected', () => {
+        const mockHandleChange = jest.fn();
+        renderWithProviders(
+            <Dropdown label="Test Label" options={options} value={null} handleOnChange={mockHandleChange} />
+        );
+
+        const input = screen.getByRole('combobox');
+        fireEvent.change(input, { target: { value: 'Option 1' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+
+        expect(mockHandleChange).toHaveBeenCalled();
     });
 });

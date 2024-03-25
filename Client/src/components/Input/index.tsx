@@ -10,6 +10,7 @@ interface InputProps {
 const Input: FC<InputProps> = ({ onChange, label, value }) => {
     return (
         <TextField
+            data-testid={`text-field-input-${label}`}
             label={label}
             value={value}
             onChange={onChange}
@@ -30,6 +31,7 @@ const Input: FC<InputProps> = ({ onChange, label, value }) => {
                 },
             }}
             inputProps={{
+                'data-testid': `input-${label}`,
                 style: {
                     color: '#bdbdbd',
                 },

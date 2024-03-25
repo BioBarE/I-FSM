@@ -112,7 +112,7 @@ const FSMActions = () => {
         <Grid ml={2} container display={'flex'} flexDirection={'column'} alignItems={'flex-start'} gap={2}>
             <Box sx={{display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start'}}>
                 <Label text={'Name Your Machine'}/>
-                <Dropdown handleOnChange={handleFSMNameChange} options={FSMs} value={selectedCurrentFSM}/>
+                <Dropdown label={'FSM Name'} handleOnChange={handleFSMNameChange} options={FSMs} value={selectedCurrentFSM}/>
             </Box>
             <Box sx={{display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start'}}>
                 <Label text={'Lets create a new transition to this machine'}/>
