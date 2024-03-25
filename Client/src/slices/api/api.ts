@@ -6,7 +6,7 @@ import {Response, Transition} from "../../types";
 
 export const rest = createApi({
     reducerPath: 'rest',
-    baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3001/api/fsm'}),
+    baseQuery: fetchBaseQuery({baseUrl: 'https://i-fsm-1.onrender.com/api/fsm'}),
     tagTypes: ['FSM', 'FSMs'],
     endpoints: (builder) => ({
         getCurrentState: builder.query({query: () => '/state'}),
