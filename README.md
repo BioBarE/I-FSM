@@ -17,9 +17,10 @@ Open a terminal at the Client folder and run:
 
 ## Things I would have added if I had infinite time
 
-- Add event driven triggers.
-- Add option to update a transition.
+- Add event-driven triggers.
+- Add an option to update a transition.
 - more validations.
 - more tests.
-- Add a Callback on each time a transition is made.
+- Add a Callback each time a transition is made.
+- Delete of an FSM.
 
