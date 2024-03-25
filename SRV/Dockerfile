@@ -1,4 +1,5 @@
 FROM node:alpine AS builder
+RUN pwd
 
 ARG PROJECT_NAME=srv
 
@@ -9,7 +10,6 @@ WORKDIR /${PROJECT_NAME}
 
 RUN npm install
 
-RUN pwd
 
 COPY . /${PROJECT_NAME}
 WORKDIR /${PROJECT_NAME}
