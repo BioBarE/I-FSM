@@ -1,18 +1,16 @@
 FROM node:alpine AS builder
 
-WORKDIR /app
+ARG PROJECT_NAME=srv
 
-COPY package*.json ./
+COPY ./package.json /${PROJECT_NAME}/package.json
+COPY ./package-lock.json /${PROJECT_NAME}/package-lock.json
+
+WORKDIR /${PROJECT_NAME}
+
 RUN npm install
 
-COPY . .
-
-FROM node:alpine
-
-WORKDIR /app
-
-COPY --from=builder ./node_modules ./node_modules
-COPY . .
+COPY . /${PROJECT_NAME}
+WORKDIR /${PROJECT_NAME}
 
 EXPOSE 3001
 
