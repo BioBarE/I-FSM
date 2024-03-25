@@ -21,7 +21,6 @@ const FSMActions = () => {
 
     const [transitionSource, setTransitionSource] = useState<string>('');
     const [transitionTarget, setTransitionTarget] = useState<string>('');
-    const [fsmLabel, setFsmLabel] = useState<string | null>(null);
     const [isInitialState, setIsInitialState] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -73,12 +72,9 @@ const FSMActions = () => {
         if (typeof newValue === 'object' && newValue) {
             let newFSMLabel = newValue.label;
             if (newValue?.label) {
-
                 if (newValue?.label?.startsWith("Add")) {
                     newFSMLabel = newValue.label.substring(4).trim();
                 }
-
-                setFsmLabel(newValue.label);
             }
             // selected already created fsm
             if (newValue?.id) {
